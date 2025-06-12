@@ -12,8 +12,8 @@ func LoadConfig() Config {
 	return Config{
 		DBHost:     "localhost",
 		DBPort:     "5432",
-		DBUser:     "postgres",
 		DBName:     "user_db",
+		DBUser:     "postgres",
 		DBPassword: "postgres",
 	}
 }
