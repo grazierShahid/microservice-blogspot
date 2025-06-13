@@ -17,6 +17,7 @@ func NewUserHandler(r *mux.Router, svc service.UserService) {
 	h := &UserHandler{svc}
 
 	r.HandleFunc("/register", h.Register).Methods(http.MethodPost)
+	r.HandleFunc("/login", h.Login).Methods(http.MethodPost)
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -29,4 +30,23 @@ _:
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
+}
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var creds models.LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&creds)
+	if err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	resp := h.svc.Login(&creds)
+
+	statusCode := http.StatusOK
+	if resp.Status != "success" {
+		statusCode = http.StatusUnauthorized
+	}
+
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(resp)
 }

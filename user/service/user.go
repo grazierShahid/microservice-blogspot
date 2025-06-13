@@ -7,6 +7,7 @@ import (
 
 type UserService interface {
 	Register(user *models.User) error
+	Login(user *models.LoginRequest) models.LoginResponse
 }
 
 type userService struct {
@@ -19,4 +20,21 @@ func NewUserService(r repository.User) UserService {
 
 func (s *userService) Register(user *models.User) error {
 	return s.repo.Register(user)
+}
+
+func (s *userService) Login(req *models.LoginRequest) models.LoginResponse {
+	user, err := s.repo.GetByUsername(req.Username)
+	if err != nil {
+		return models.LoginResponse{Status: "user not found"}
+	}
+
+	if user.Password != req.Password {
+		return models.LoginResponse{Status: "invalid password"}
+	}
+
+	if user.IsDeleted || !user.Active {
+		return models.LoginResponse{Status: "user inactive or deleted"}
+	}
+
+	return models.LoginResponse{Status: "success"}
 }
